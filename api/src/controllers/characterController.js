@@ -25,14 +25,51 @@ const addCharacter = (req,res, next)=>{
 async function getCharacters(req, res, next){
     try {
 
-        let apiCharacters = (await axios.get("https://rickandmortyapi.com/api/character")).data.results
-        let dbCharacters= await Characters.findAll({include: Episodes})
-        let allChars= dbCharacters.concat(apiCharacters)
+        let {name, order,page} = req.query
+        let apiCharacters
+        let dbCharacters
+        let allChars=[]
+        page = page ? page : 1
+        const charXPage = 5;
 
+        //#region NAME
+        if(name && name !== ""){
+            apiCharacters = (await axios.get(`https://rickandmortyapi.com/api/character/?name=${name}`)).data.results;
+            dbCharacters = await Characters.findAll({
+                where: {
+                    name:{
+                        [Op.iLike]: `%${name}%`
+                    }
+                }
+            })
+            allChars = dbCharacters.concat(apiCharacters)
+        }
+        else {
+            apiCharacters = (await axios.get("https://rickandmortyapi.com/api/character")).data.results
+            dbCharacters = await Characters.findAll({include: Episodes})
 
+            allChars= dbCharacters.concat(apiCharacters)
+        }
+        //#endregion
+        //#region ORDER
+        if ( order === "asc" || !order){
+            allChars = allChars.sort((a,b) => {
+                return a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+            })
+        }else{
+            allChars = allChars.sort((a,b) => {
+                return b.name.toLowerCase().localeCompare(a.name.toLowerCase())
+            })
+        }
+        //#endregion
+        //#region PAGE
+        let result = allChars.slice((charXPage * (page - 1)), (charXPage * (page - 1)) + 1 )
+        //#endregion
 
-
-        res.send(allChars)
+        return res.send({
+            result: result,
+            count: allChars.length
+        })
 
     } catch (error) {
         next(error)
@@ -42,8 +79,20 @@ async function getCharacters(req, res, next){
 
 
 
-async function getCharacterById(){
+async function getCharacterById(req,res,next){
+    try {
+        const { id } = req.params
+        let character;
+        if(isNaN(id)){
+            character = await Characters.findByPk(id)
+        }else{
+            character = await (axios.get(`https://rickandmortyapi.com/api/character/${id}`)).data
+        }
 
+        return res.json(character)
+    } catch (error) {
+        next(error)
+    }
 }
 
 module.exports={
