@@ -1,9 +1,9 @@
 import './App.css';
 import React from "react";
 import { Route} from "react-router-dom";
-import LandingPage from "./Components/LandingPage.js"
-import Home from "./Components/Home.js"
-import NavBar from "./Components/NavBar.js"
+import LandingPage from "./Components/LandingPage.jsx"
+import Home from "./Components/Home.jsx"
+import NavBar from "./Components/NavBar.jsx"
 
 
 

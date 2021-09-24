@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {getCharacters} from "../Redux/Actions/index.js";
-import Card from "./Card.js"
+import Card from "./Card.jsx"
 
 
 
